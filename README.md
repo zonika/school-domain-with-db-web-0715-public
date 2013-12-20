@@ -3,7 +3,7 @@
   languages: sql, ruby
 ---
 
-003-School-Domain
+School-Domain
 =================
 
 Make the tests pass. Use RSpec
