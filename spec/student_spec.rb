@@ -1,223 +1,168 @@
 require_relative 'spec_helper'
 
 describe Student do
+
+  describe 'attributes' do 
+    it 'has an id, name, tagline, github, twitter, blog_url, image_url, biography' do
+      attributes = {
+        :id => 1,
+        :name => "Avi",
+        :tagline => "Teacher",
+        :github => "aviflombaum",
+        :twitter => "aviflombaum",
+        :blog_url => "http://aviflombaum.com",
+        :image_url => "http://aviflombaum.com/picture.jpg",
+        :biography => "Programming is my favorite thing in the whole wide world."
+      }
+
+      avi = Student.new
+      avi.id = attributes[:id]
+      avi.name = attributes[:name]
+      avi.tagline = attributes[:tagline]
+      avi.github = attributes[:github]
+      avi.twitter = attributes[:twitter]
+      avi.blog_url = attributes[:blog_url]
+      avi.image_url = attributes[:image_url]
+      avi.biography = attributes[:biography]
+
+      expect(avi.id).to eq(attributes[:id])
+      expect(avi.name).to eq(attributes[:name])
+      expect(avi.tagline).to eq(attributes[:tagline])
+      expect(avi.github).to eq(attributes[:github])
+      expect(avi.twitter).to eq(attributes[:twitter])
+      expect(avi.blog_url).to eq(attributes[:blog_url])
+      expect(avi.image_url).to eq(attributes[:image_url])
+      expect(avi.biography).to eq(attributes[:biography])
+    end
+  end
+
   describe '::create_table' do
-    it 'creates a table within the database' do
+    it 'creates a student table' do
+      Student.drop_table
+      Student.create_table
+
+      table_check_sql = "SELECT tbl_name FROM sqlite_master WHERE type='table' AND tbl_name='students';"
+      expect(DB[:conn].execute(table_check_sql)[0]).to eq(['students'])
+    end
+  end
+
+  describe '::drop_table' do
+    it "drops the student table" do
+      Student.create_table
+      Student.drop_table
+
       table_check_sql = "SELECT tbl_name FROM sqlite_master WHERE type='table' AND tbl_name='students';"
       expect(DB[:conn].execute(table_check_sql)[0]).to be_nil
+    end
+  end
 
-      Student.create_table
-      expect(DB[:conn].execute(table_check_sql)[0].first).to eq('students')
+  describe '#insert' do
+    it 'inserts the student into the database' do
+      avi = Student.new
+      avi.name = "Avi"
+      avi.tagline = "Teacher"
+      avi.github = "aviflombaum"
+      avi.twitter = "aviflombaum"
+      avi.blog_url = "http://aviflombaum.com"
+      avi.image_url = "http://aviflombaum.com/picture.jpg"
+      avi.biography = "aviflombaum"
+
+      avi.insert
+
+      select_sql = "SELECT name FROM students WHERE name = 'Avi'"
+      result = DB[:conn].execute(select_sql)[0]
+
+      expect(result[0]).to eq("Avi")
+    end
+
+    it 'updates the current instance with the ID of the student from the database' do
+      avi = Student.new
+      avi.name = "Avi"
+      avi.tagline = "Teacher"
+      avi.github = "aviflombaum"
+      avi.twitter = "aviflombaum"
+      avi.blog_url = "http://aviflombaum.com"
+      avi.image_url = "http://aviflombaum.com/picture.jpg"
+      avi.biography = "aviflombaum"
+
+      avi.insert
+
+      expect(avi.id).to eq(1)
+    end
+  end
+
+  describe '::new_from_db' do
+    it 'creates an instance with corresponding attribute values' do
+      row = [1, "Avi", "Teacher", "aviflombaum", "aviflombaum", "http://aviflombaum.com", "http://aviflombaum.com/picture.jpg"]
+      avi = Student.new_from_db(row)
+
+      expect(avi.id).to eq(row[0])
+      expect(avi.name).to eq(row[1])
+      expect(avi.tagline).to eq(row[2])
+      expect(avi.github).to eq(row[3])
+      expect(avi.twitter).to eq(row[4])
+      expect(avi.blog_url).to eq(row[5])
+      expect(avi.image_url).to eq(row[6])
+      expect(avi.biography).to eq(row[7])
+    end
+  end
+
+  describe '::find_by_name' do
+    it 'returns an instance of student that matches the name from the DB' do
+      avi = Student.new
+      avi.name = "Avi"
+      avi.tagline = "Teacher"
+      avi.github = "aviflombaum"
+      avi.twitter = "aviflombaum"
+      avi.blog_url = "http://aviflombaum.com"
+      avi.image_url = "http://aviflombaum.com/picture.jpg"
+      avi.biography = "aviflombaum"
+
+      avi.insert
+
+      avi_from_db = Student.find_by_name("Avi")
+      expect(avi_from_db.name).to eq("Avi")
+      expect(avi_from_db).to be_an_instance_of(Student)
+    end
+  end
+
+  describe "#update" do
+    it 'updates and persists a student in the database' do
+      avi = Student.new
+      avi.name = "Avi"
+      avi.insert
+
+      avi.name = "Bob"
+      original_id = avi.id
+
+      avi.update
+
+      avi_from_db = Student.find_by_name("Avi")
+      expect(avi_from_db).to be_nil
+
+      bob_from_db = Student.find_by_name("Bob")
+      expect(bob_from_db).to be_an_instance_of(Student)
+      expect(bob_from_db.name).to eq("Bob")
+      expect(bob_from_db.id).to eq(original_id)
+    end
+  end
+
+  describe '#save' do
+    it "chooses the right thing on first save" do
+      avi = Student.new
+      avi.name = "Avi"
+      expect(avi).to receive(:insert)
+      avi.save
+    end
+
+    it 'chooses the right thing for all others' do
+      avi = Student.new
+      avi.name = "Avi"
+      avi.save
+
+      avi.name = "Bob"
+      expect(avi).to receive(:update)
+      avi.save      
     end
   end
 end
-  
-
-# end
-
-# describe Student do
-#   context "database operations" do
-#     before(:each) do
-#       Student.reset_all
-#       @student = Student.new.tap { |s| s.name = "Anything But Scott Oh Nevermind" }
-#     end
-
-#     #think about what you need to do to set up a database
-#     #and what should have the responsibility for doing that for these tests
-
-#     describe ".insert" do
-#       it "persists the student to the database" do
-#         @student.should respond_to(:insert)
-#         @student.insert.should eq(true)
-#       end
-#     end
-
-#     describe ".update" do
-#       it "updates the student in the database" do
-#         @student.insert
-#         @student.name = "Catherine"
-#         @student.update.should eq(true)
-#       end
-#     end
-
-#     describe ".save" do
-#       it "chooses the right thing on first save" do
-#         @student.should_receive(:insert)
-#         @student.save
-#       end
-#       it "chooses the right thing after saving" do
-#         @student.save
-#         @student.name = "Steven"
-#         @student.should_receive(:update)
-#         @student.save
-#       end
-#     end
-
-#     #bonus 1:  prove it!
-#     describe "::load" do
-#       it "loads the student from the database" do
-#         @student.save
-#         loaded = Student.load(@student.id)
-#         loaded.name.should eq(@student.name)
-#         loaded.id.should eq(@student.id)
-#         @student.name = "new name"
-#         @student.save
-#         updated = Student.load(@student.id)
-#         updated.name.should eq(@student.name)
-#       end
-
-#     end
-#   end
-# end
-
-
-# describe "Student" do
-
-#   before(:each) do
-#     Student.reset_all
-#   end
-
-#   it "can be instantiated" do
-#     Student.new.should be_an_instance_of(Student)
-#   end
-
-#   describe "student properties" do
-#     let(:student) { Student.new }
-
-#     context 'creating a new student' do
-#       it 'has properties based on an attributes hash' do
-#         Student.attributes_for_db.each do |attribute|
-#           student.send("#{attribute}=", "Testing #{attribute}")
-#         end
-#         student.save
-
-#         test_student = Student.find(student.id)
-
-#         Student.attributes_for_db.each do |attribute|
-#           test_student.send(attribute).should eq("Testing #{attribute}")
-#         end
-#       end
-#     end
-
-#     context 'update a student' do
-#       it 'has properties based on an attributes hash' do
-#         Student.attributes_for_db.each do |attribute|
-#           student.send("#{attribute}=", "Original #{attribute}")
-#         end
-#         student.save
-
-#         Student.attributes_for_db.each do |attribute|
-#           student.send("#{attribute}=", "Updated #{attribute}")
-#         end
-#         student.save
-
-#         test_student = Student.find(student.id)
-
-#         Student.attributes_for_db.each do |attribute|
-#           test_student.send(attribute).should eq("Updated #{attribute}")
-#         end
-#       end
-#     end
-#   end
-
-#   describe "::all" do
-
-#     it "keeps track of the students that have been created" do
-#       Student.reset_all
-
-#       ('a'..'c').each do |l|
-#         s = Student.new
-#         s.name = l
-#         s.save
-#       end
-
-#       Student.all.count.should eq(3)
-#       Student.all.collect { |s| s.name }.should include('a')
-#     end
-
-#   end
-
-#   describe "::reset_all" do
-
-#     it "resets the set of created students" do
-#       10.times do
-#         Student.new
-#       end
-
-#       Student.reset_all
-#       Student.all.count.should eq(0)
-#     end
-
-#   end
-
-#   #BONUS ROUND! Implement an ID system
-#   context "with an ID" do
-
-#     let(:student) { Student.new }
-
-#     before(:each) do
-#       Student.reset_all
-#     end
-
-
-#     it "has an ID" do
-#       student.should respond_to(:id)
-#     end
-
-#     it "doesn't allow ID to be changed" do
-#       student.should_not respond_to(:id=)
-#     end
-
-#     it "auto-assigns an id" do
-#       student.name = "Becky"
-#       student.save
-#       student.id.should eq(1)
-
-#       s2 = Student.new
-#       s2.save
-#       s2.id.should eq(2)
-#     end
-
-#     describe "::delete" do
-
-#       it "can be deleted" do
-#         student.name = "Steve"
-#         5.times do
-#           Student.new.tap { |s| s.name = "Clara" }
-#         end
-
-#         Student.delete(student.id)
-#         Student.all.collect { |s| s.name }.should_not include("Steve")
-#       end
-
-#     end
-#   end
-
-# end
-
-# describe "Student", "finders" do
-#   let(:student){Student.new}
-  
-#   before(:each) do
-#     Student.reset_all
-#   end
-
-#   it 'has a finder for every attribute' do
-#     Student.attributes.each do |attribute|
-#       Student.should respond_to("find_by_#{attribute}")
-#     end
-#   end
-
-#   it 'finds a student by every attribute' do
-#     # create a student with every attribute value
-#     Student.attributes_for_db.each do |attribute|
-#       student.send("#{attribute}=", "Find #{attribute}")
-#     end
-#     student.save
-    
-#     Student.attributes_for_db.each do |attribute|
-#       Student.send("find_by_#{attribute}", "Find #{attribute}").first.should eq(student)
-#     end
-#   end
-# end
-

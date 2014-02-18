@@ -12,7 +12,19 @@ RSpec.configure do |config|
   config.formatter = :progress # :progress, :html, :textmate
 
   #you can do global before/after here like this:
-  #config.before(:each) do
-  #  #code
-  #end
+  config.before(:each) do
+    if Student.respond_to?(:create_table)
+      Student.create_table 
+    else
+      DB[:conn].execute("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY, name TEXT, tagline TEXT, github TEXT, twitter TEXT, blog_url TEXT, image_url TEXT, biography TEXT)")
+    end
+  end
+
+  config.after(:each) do
+    if Student.respond_to?(:drop_table)
+      Student.drop_table
+    else
+      DB[:conn].execute("DROP TABLE IF EXISTS students")
+    end
+  end
 end
