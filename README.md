@@ -110,7 +110,7 @@ Internally, what will the find_by_name method do to find a student, which SQL st
 
 This spec will create and insert a student and after will change the name of the student instance and call update. The expectations are that after this operation there is no student left over in the database with the old name. If we query the database for a student with the new name, we should find that student and the ID of that student should be the same as the original, signifying this is the same student, they just changed their name.
 
-`#save`
+### `#save`
 
 This spec ensures that given an instance of a student, simply calling save will trigger the correct operation. To implement this, you will have to figure out a way for an instance to determine whether it has been persisted into the DB.
 
