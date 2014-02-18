@@ -1,5 +1,5 @@
-Dir[File.join(File.dirname(__FILE__), "../lib", "*.rb")].each {|f| require f}
-
+require_relative '../config/environment'
+DB[:conn] = SQLite3::Database.new ":memory:"
 
 RSpec.configure do |config|
   # Use color in STDOUT
@@ -9,7 +9,7 @@ RSpec.configure do |config|
   config.tty = true
 
   # Use the specified formatter
-  config.formatter = :documentation # :progress, :html, :textmate
+  config.formatter = :progress # :progress, :html, :textmate
 
   #you can do global before/after here like this:
   #config.before(:each) do
