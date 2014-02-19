@@ -1,5 +1,3 @@
-require 'pry'
-
 class Student
   ATTRIBUTES = {
     :id => "INTEGER PRIMARY KEY",
@@ -70,7 +68,7 @@ class Student
   end    
 
   def persisted?
-    self.id
+    !!self.id
   end
 
   def save
