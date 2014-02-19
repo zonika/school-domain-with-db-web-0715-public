@@ -1,5 +1,3 @@
-require 'pry'
-
 class Student
   ATTRIBUTES = {
     :id => "INTEGER PRIMARY KEY",
@@ -66,12 +64,11 @@ class Student
 
   def update
     sql = "UPDATE students SET #{sql_for_update} WHERE id = ?"
-    binding.pry
     DB[:conn].execute(sql, *attribute_values, id)
   end    
 
   def persisted?
-    self.id
+    !!self.id
   end
 
   def save
