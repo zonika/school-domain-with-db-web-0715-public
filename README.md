@@ -1,6 +1,7 @@
 ---
   tags: sqlite, orm, object orientation
   languages: sql, ruby
+  resources: 1
 ---
 
 # Basic Student ORM
@@ -139,3 +140,5 @@ Students should not be allowed to change their ids.
 #### More Finders
 
 Build a find_by method for every attribute, find_by_id, find_by_github, etc. Deal with multiple matches
+## Resources
+* [Wikipedia](http://en.wikipedia.org/) - [Object-Relational Mapping](http://en.wikipedia.org/wiki/Object-relational_mapping)
