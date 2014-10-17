@@ -19,6 +19,7 @@ RSpec.configure do |config|
 
   config.after(:each) do
     if Student.respond_to?(:drop_table)
+      Student.create_table
       Student.drop_table
     else
       DB[:conn].execute("DROP TABLE IF EXISTS students")
