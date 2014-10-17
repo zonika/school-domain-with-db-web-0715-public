@@ -1,6 +1,7 @@
 ---
   tags: sqlite, orm, object orientation
   languages: sql, ruby
+  resources: 1
 ---
 
 # Basic Student ORM
@@ -22,10 +23,6 @@ Additionally, our environment is going to define a constant, `DB`, that will be 
 ### Attributes
 
 The first test is just about making sure that our students have all the required attributes and that they are readable and writeable.
-
-#### BONUS
-
-1. How can this be refactored, both in the test and within the Student class? There is a powerful pattern here, see if you can see it.
 
 ### `::create_table`
 
@@ -74,12 +71,6 @@ It basically is the exact opposite of the previous test, in fact, it relies on t
 
 Your job is to define a class method on `Student` that will execute the correct SQL to drop a students table.
 
-#### BONUS
-
-1. Think about removing the duplication from these tests.
-2. Is there a useful method missing from the `Student` class that would further simplify this test?
-3. How does the order the tests run in impact the results? In fact, this is a big problem that has actually be solved in this code base - find the solution.
-
 ### `#insert` do
 
 This method will do the heavy lifting of inserting a student instance into the database.
@@ -88,17 +79,9 @@ The test simply instantiates a student and then calls insert. The expectation is
 
 The second test in the insert describe block is a bit more abstract. The basic premise is that after we insert a student into the database, the database has assigned it an auto-incrementing primary key. We have to update the current instance with this ID value otherwise this instance does not fully mirror the current state in the DB. To implement this behavior, you will need to know how to ask SQLite3 for the last inserted ID in a table, which would be: `SELECT last_insert_rowid() FROM students` [law_insert_rowid()](http://www.sqlite.org/lang_corefunc.html#last_insert_rowid)
 
-#### BONUS
-
-1. How many times do you think we'll repeat and collect the various attributes of a student? How many places does that information live right now (so if we wanted to add an attribute, how many changes to our code would we need)? Can you think of a better way?
-
 ### `::new_from_db`
 
 This is an interesting method. Ultimately, the database is going to return an array representing a student's data. We need a way to cast that data into the appropriate attributes of a student. This method encapsulates that functionality. You can even think of it as new_from_array. Methods like this, that return instances of the class, are known as constructors, just like `::new`, except that they extend the functionality of `::new` without overwriting `initializee`
-
-#### BONUS
-
-1. Why do we build new_from_db and not just use initialize?
 
 ### `::find_by_name`
 
@@ -120,6 +103,24 @@ In the next test, we create an instane, save it, change it's name, and then spec
 
 ### BONUSES
 
+#### Attributes
+
+How can this be refactored, both in the test and within the Student class? There is a powerful pattern here, see if you can see it.
+
+#### `.create_table` and `.drop_table`
+
+1. Think about removing the duplication from these tests.
+2. Is there a useful method missing from the `Student` class that would further simplify this test?
+3. How does the order the tests run in impact the results? In fact, this is a big problem that has actually be solved in this code base - find the solution.
+
+#### `#insert`
+
+1. How many times do you think we'll repeat and collect the various attributes of a student? How many places does that information live right now (so if we wanted to add an attribute, how many changes to our code would we need)? Can you think of a better way?
+
+#### `::new_from_db`
+
+Why do we build `::new_from_db` and not just use initialize?
+
 #### `::all`
 
 Implement and test a `Student.all` method that returns all instance.
@@ -138,4 +139,7 @@ Students should not be allowed to change their ids.
 
 #### More Finders
 
-Build a find_by method for every attribute, find_by_id, find_by_github, etc. Deal with multiple matches
+Build a `find_by` method for every attribute, `find_by_id`, `find_by_github`, etc. Deal with multiple matches
+
+## Resources
+* [Wikipedia](http://en.wikipedia.org/) - [Object-Relational Mapping](http://en.wikipedia.org/wiki/Object-relational_mapping)

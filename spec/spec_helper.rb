@@ -2,9 +2,6 @@ require_relative '../config/environment'
 DB[:conn] = SQLite3::Database.new ":memory:"
 
 RSpec.configure do |config|
-  # Use color in STDOUT
-  config.color_enabled = true
-
   # Use color not only in STDOUT but also in pagers and files
   config.tty = true
 
@@ -24,6 +21,7 @@ RSpec.configure do |config|
 
   config.after(:each) do
     if Student.respond_to?(:drop_table)
+      Student.create_table
       Student.drop_table
     else
       DB[:conn].execute("DROP TABLE IF EXISTS students")
