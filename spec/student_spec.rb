@@ -36,7 +36,7 @@ describe Student do
     end
   end
 
-  describe '::create_table' do
+  describe '.create_table' do
     it 'creates a student table' do
       DB[:conn].execute('DROP TABLE IF EXISTS students')
       Student.create_table
