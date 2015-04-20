@@ -38,7 +38,7 @@ describe Student do
 
   describe '::create_table' do
     it 'creates a student table' do
-      Student.drop_table
+      DB[:conn].execute('DROP TABLE IF EXISTS students')
       Student.create_table
 
       table_check_sql = "SELECT tbl_name FROM sqlite_master WHERE type='table' AND tbl_name='students';"
