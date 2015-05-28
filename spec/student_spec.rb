@@ -48,7 +48,6 @@ describe Student do
 
   describe '::drop_table' do
     it "drops the student table" do
-      Student.create_table
       Student.drop_table
 
       table_check_sql = "SELECT tbl_name FROM sqlite_master WHERE type='table' AND tbl_name='students';"
