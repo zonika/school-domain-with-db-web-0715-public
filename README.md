@@ -12,7 +12,7 @@ Will define a `Student` class that includes behaviors of a basic ORM.
 
 ## Environment
 
-Our environment is going to be a single point of requires and loads. 
+Our environment is going to be a single point of requires and loads.
 
 ### `DB[:conn]`
 
@@ -26,30 +26,26 @@ The first test is just about making sure that our students have all the required
 
 ### `::create_table`
 
-This method will create a table called students with the appropriate columns.
+Your task  here is to define a class method on Student that will execute the correct SQL to create a students table.
 
 ```ruby
 describe '::create_table' do
-  it 'creates a student table' do
-    Student.drop_table
-    Student.create_table
+    it 'creates a student table' do
+      DB[:conn].execute('DROP TABLE IF EXISTS students')
+      Student.create_table
 
-    table_check_sql = "SELECT tbl_name FROM sqlite_master WHERE type='table' AND tbl_name='students';"
-    expect(DB[:conn].execute(table_check_sql)[0]).to eq(['students'])
-  end
+      table_check_sql = "SELECT tbl_name FROM sqlite_master WHERE type='table' AND tbl_name='students';"
+      expect(DB[:conn].execute(table_check_sql)[0]).to eq(['students'])
+    end
 end
 ```
 
-In our test, we first basically make sure that our database is blank by calling the soon to be defined `drop_table` method. It sort of makes sense to get these two tests to pass together. Imagine if the `create_table` method did nothing but for whatever reason, the table already existed. Simply testing the existence of the table is not enough, we must first explicitly check that the table didn't exist to begin and that it only exists after.
+In our test, we first make sure that our database is blank by executing the SQL command `DROP TABLE IF EXISTS students`, which helps make sure that we are starting with a clean database.
 
-How we're testing whether a table exists is sort of SQLite3 specific, but basically, sqlite keeps a table called `sqlite_master` that describes the rest of the database / schema. Thus if there is another table in the SQLite database, it will be represented as a row within sqlite_master.
+Next we call the soon to be defined `create_table` method.  This method will create a table called students with the appropriate columns.
 
 ![sqlite_master](http://dl.dropboxusercontent.com/s/j98mxmd5d4uec9g/2014-02-18%20at%2011.21%20AM.png)
 
-We just query that the sqlite_master table is empty at the start of the test,
-and then after calling `Student.create_table`, we expect the same query we ran at first to return the value of the tbl_name column, which should be `students`.
-
-Your job is to define a class method on `Student` that will execute the correct SQL to create a students table.
 
 ### `::drop_table`
 
@@ -58,7 +54,6 @@ This method will drop the students table from the database.
 ```ruby
 describe '::drop_table' do
   it "drops the student table" do
-    Student.create_table
     Student.drop_table
 
     table_check_sql = "SELECT tbl_name FROM sqlite_master WHERE type='table' AND tbl_name='students';"
@@ -67,9 +62,7 @@ describe '::drop_table' do
 end
 ```
 
-It basically is the exact opposite of the previous test, in fact, it relies on the `create_table` method to ensure that the table exists before we attempt to drop it (again, preventing false positives). 
-
-Your job is to define a class method on `Student` that will execute the correct SQL to drop a students table.
+It basically is the exact opposite of the previous test. Your job is to define a class method on `Student` that will execute the correct SQL to drop a students table.
 
 ### `#insert` do
 
