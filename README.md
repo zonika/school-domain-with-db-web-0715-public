@@ -6,140 +6,124 @@
 
 # Basic Student ORM
 
-This lab involves building a basic ORM for a Student. As you've learned, an ORM is an Object Relational Mapper, basically a class that acts as an analogy for how our instances correspond to rows in a database. It wraps the functionality of the database into our class.
+This lab involves building a basic ORM for a Student object.  The `Student` class defined in this lab includes behaviors of a basic ORM.
 
-Will define a `Student` class that includes behaviors of a basic ORM.
+## Objectives
+* Understand what an Object Relational Mapper(ORM) is
+* Gain ability to implement characteristics of an ORM when using a relational database management system (RDBMS) in a ruby program
 
-## Environment
 
-Our environment is going to be a single point of requires and loads. 
+## Instructions
+We are going to being this lab by very briefly discussing what an ORM is and how the the `environment.rb` file in the config directory established a connection to out applicaiton's database.
 
-### `DB[:conn]`
+- **what is an ORM?**
+  An ORM is an Object Relational Mapper. An ORM is basically a class that acts  as an analogy for how instances of Objects in an object-oriented program  correspond to rows in a database; that is it wraps the functionality of the   database into our class.
 
-Additionally, our environment is going to define a constant, `DB`, that will be equal to a hash, with a single key, `:conn`, that represents our database connection. This key will have a value of a connection to a sqlite3 database in the db directory. However, in our spec_helper, our testing environment, we're going to redefine the value of that key (not of the constant though) to point to an in-memory database. This will allow our tests to run in isolation of our production database. Whenever we want to refer to the applications connection to the database, we will simply rely on `DB[:conn]`.
+- **Environment**
+  Our environment is going to be a single point of requires and loads.
+   - `DB[:conn]`
+   Additionally, our environment is going to define a constant, `DB`, that  will be equal to a hash, with a single key, `:conn`, that represents our  database  connection. This key will have a value of a connection to a   sqlite3 database in the db directory. However, in our spec_helper, our  testing environment, we're going to redefine the value of that key (not of  the constant though) to point to an in-memory database. This will allow our   tests to run in   isolation of our production database. Whenever we want to   refer to the  applications connection to the database, we will simply rely on   `DB[:conn]`.
 
-## The Spec Suite
+## Solving The Lab: The Spec Suite
+-  **RSpec Test 1: `#attributes`**
+  The first test is just about making sure that our students have all the required attributes and that they are readable and writeable.
 
-### Attributes
+-  **RSpec Test 2: `::create_table`**
+  Your task  here is to define a class method on Student that will execute  the correct SQL to create a students table.
 
-The first test is just about making sure that our students have all the required attributes and that they are readable and writeable.
+    ```ruby
+    describe '::create_table' do
+        it 'creates a student table' do
+          DB[:conn].execute('DROP TABLE IF EXISTS students')
+          Student.create_table
 
-### `::create_table`
+          table_check_sql = "SELECT tbl_name FROM sqlite_master WHERE type='table' AND tbl_name='students';"
+          expect(DB[:conn].execute(table_check_sql)[0]).to eq(['students'])
+        end
+    end
+    ```
 
-This method will create a table called students with the appropriate columns.
+  In our test, we first make sure that our database is blank by executing the SQL command `DROP TABLE IF EXISTS students`, which helps make sure that we are starting with a clean database.
 
-```ruby
-describe '::create_table' do
-  it 'creates a student table' do
-    Student.drop_table
-    Student.create_table
+  Next we call the soon to be defined `create_table` method.  This method will create a table called students with the appropriate columns.
 
-    table_check_sql = "SELECT tbl_name FROM sqlite_master WHERE type='table' AND tbl_name='students';"
-    expect(DB[:conn].execute(table_check_sql)[0]).to eq(['students'])
-  end
-end
-```
+  ![sqlite_master](http://dl.dropboxusercontent.com/s/j98mxmd5d4uec9g/2014-02-18%20at%2011.21%20AM.png)
 
-In our test, we first basically make sure that our database is blank by calling the soon to be defined `drop_table` method. It sort of makes sense to get these two tests to pass together. Imagine if the `create_table` method did nothing but for whatever reason, the table already existed. Simply testing the existence of the table is not enough, we must first explicitly check that the table didn't exist to begin and that it only exists after.
-
-How we're testing whether a table exists is sort of SQLite3 specific, but basically, sqlite keeps a table called `sqlite_master` that describes the rest of the database / schema. Thus if there is another table in the SQLite database, it will be represented as a row within sqlite_master.
-
-![sqlite_master](http://dl.dropboxusercontent.com/s/j98mxmd5d4uec9g/2014-02-18%20at%2011.21%20AM.png)
-
-We just query that the sqlite_master table is empty at the start of the test,
-and then after calling `Student.create_table`, we expect the same query we ran at first to return the value of the tbl_name column, which should be `students`.
-
-Your job is to define a class method on `Student` that will execute the correct SQL to create a students table.
-
-### `::drop_table`
-
+-  **RSpec Test 3: `::drop_table`**
 This method will drop the students table from the database.
 
-```ruby
-describe '::drop_table' do
-  it "drops the student table" do
-    Student.create_table
-    Student.drop_table
+  ```ruby
+  describe '::drop_table' do
+    it "drops the student table" do
+        Student.drop_table
 
-    table_check_sql = "SELECT tbl_name FROM sqlite_master WHERE type='table' AND tbl_name='students';"
-    expect(DB[:conn].execute(table_check_sql)[0]).to be_nil
+      table_check_sql = "SELECT tbl_name FROM sqlite_master WHERE type='table' AND tbl_name='students';"
+      expect(DB[:conn].execute(table_check_sql)[0]).to be_nil
+    end
   end
-end
 ```
 
-It basically is the exact opposite of the previous test, in fact, it relies on the `create_table` method to ensure that the table exists before we attempt to drop it (again, preventing false positives). 
+  It basically is the exact opposite of the previous test. Your job is to   define a class method on `Student` that will execute the correct SQL to drop  a students table.
+-  **RSpec Test 4: `#insert`**
+  This method will do the heavy lifting of inserting a student instance into    the database.
 
-Your job is to define a class method on `Student` that will execute the correct SQL to drop a students table.
+  The test simply instantiates a student and then calls insert. The   expectation is that if we then run a simple SELECT looking for that student   by name (I know, not the best thing to measure, but it'll do), we should  find a row with that very data.
 
-### `#insert` do
+  The second test in the insert describe block is a bit more abstract. The  basic premise is that after we insert a student into the database, the  database has assigned it an auto-incrementing primary key. We have to update  the current instance with this ID value otherwise this instance does not  fully mirror the current state in the DB. To implement this behavior, you   will need to know how to ask SQLite3 for the last inserted ID in a table,   which would be: `SELECT last_insert_rowid() FROM students` [law insert rowid()](http://www.sqlite.org/lang_corefunc.html#last_insert_rowid)
 
-This method will do the heavy lifting of inserting a student instance into the database.
+- **RSpec Test 5: `::new_from_db`**
 
-The test simply instantiates a student and then calls insert. The expectation is that if we then run a simple SELECT looking for that student by name (I know, not the best thing to measure, but it'll do), we should find a row with that very data.
+  This is an interesting method. Ultimately, the database is going to   return an array representing a student's data. We need a way to cast that   data into the appropriate attributes of a student. This method  encapsulates that functionality. You can even think of it as  new_from_array. Methods like this, that return instances of the class,  are known as constructors, just like `::new`, except that they extend the   functionality of `::new` without overwriting `initialize`
 
-The second test in the insert describe block is a bit more abstract. The basic premise is that after we insert a student into the database, the database has assigned it an auto-incrementing primary key. We have to update the current instance with this ID value otherwise this instance does not fully mirror the current state in the DB. To implement this behavior, you will need to know how to ask SQLite3 for the last inserted ID in a table, which would be: `SELECT last_insert_rowid() FROM students` [law_insert_rowid()](http://www.sqlite.org/lang_corefunc.html#last_insert_rowid)
+- **RSpec Test 5: `::find_by_name`**
 
-### `::new_from_db`
+  This spec will first insert a student into the database and then attempt to   find it by calling the find_by_name method. The expectations are that an  instance of the student class that has all the properties of a student is   returned, not primitive data.
 
-This is an interesting method. Ultimately, the database is going to return an array representing a student's data. We need a way to cast that data into the appropriate attributes of a student. This method encapsulates that functionality. You can even think of it as new_from_array. Methods like this, that return instances of the class, are known as constructors, just like `::new`, except that they extend the functionality of `::new` without overwriting `initialize`
+  Internally, what will the find_by_name method do to find a student, which   SQL statement must it run? Additionally, what method might find_by_name use   internally to quickly take a row and create an instance to represent that   data?
 
-### `::find_by_name`
+- **RSpec Test 5: `#update`**
 
-This spec will first insert a student into the database and then attempt to find it by calling the find_by_name method. The expectations are that an instance of the student class that has all the properties of a student is returned, not primitive data.
+  This spec will create and insert a student and after will change the name of  the student instance and call update. The expectations are that after this  operation there is no student left over in the database with the old name.  If we query the database for a student with the new name, we should find  that student and the ID of that student should be the same as the original,   signifying this is the same student, they just changed their name.
 
-Internally, what will the find_by_name method do to find a student, which SQL statement must it run? Additionally, what method might find_by_name use internally to quickly take a row and create an instance to represent that data?
+- **RSpec Test 5: `#save`**
 
-### `#update`
+  This spec ensures that given an instance of a student, simply calling save  will trigger the correct operation. To implement this, you will have to   figure out a way for an instance to determine whether it has been persisted   into the DB.
 
-This spec will create and insert a student and after will change the name of the student instance and call update. The expectations are that after this operation there is no student left over in the database with the old name. If we query the database for a student with the new name, we should find that student and the ID of that student should be the same as the original, signifying this is the same student, they just changed their name.
+  In the first test we create an instance, specify, since it has never been   saved before, that the instance will receive a method call to `insert`.
 
-### `#save`
+  In the next test, we create an instane, save it, change it's name, and then   specify that a call to the save method should trigger an `update`.
 
-This spec ensures that given an instance of a student, simply calling save will trigger the correct operation. To implement this, you will have to figure out a way for an instance to determine whether it has been persisted into the DB.
+  ## BONUSES
 
-In the first test we create an instance, specify, since it has never been saved before, that the instance will receive a method call to `insert`.
+  * **Attributes**
+    How can this be refactored, both in the test and within the Student     class? There is a powerful pattern here, see if you can see it.
 
-In the next test, we create an instane, save it, change it's name, and then specify that a call to the save method should trigger an `update`.
+  * **`.create_table` and `.drop_table`**
+    1. Think about removing the duplication from these tests.
+    2. Is there a useful method missing from the `Student` class that would       further simplify this test?
+    3. How does the order the tests run in impact the results? In fact, this      is a big problem that has actually be solved in this code base - find       the solution.
 
-### BONUSES
+  * **`#insert`**
 
-#### Attributes
+    - How many times do you think we'll repeat and collect the various      attributes of a student? How many places does that information live       right now (so if we wanted to add an attribute, how many changes to       our code would we need)? Can you think of a better way?
 
-How can this be refactored, both in the test and within the Student class? There is a powerful pattern here, see if you can see it.
+  * **`::new_from_db`**
+    - Why do we build `::new_from_db` and not just use initialize?
 
-#### `.create_table` and `.drop_table`
+  * **`::all`**
+    - Implement and test a `Student.all` method that returns all instance.
 
-1. Think about removing the duplication from these tests.
-2. Is there a useful method missing from the `Student` class that would further simplify this test?
-3. How does the order the tests run in impact the results? In fact, this is a big problem that has actually be solved in this code base - find the solution.
+  *  **`#delete`**
+    - Implement and test deleting a student.
 
-#### `#insert`
+  * **`#==`**
+    - Teach and test that students coming out of the database are equal to each other even though the objects are different.
 
-1. How many times do you think we'll repeat and collect the various attributes of a student? How many places does that information live right now (so if we wanted to add an attribute, how many changes to our code would we need)? Can you think of a better way?
+  * **Prevent ID manipulation**
+    - Students should not be allowed to change their ids.
 
-#### `::new_from_db`
-
-Why do we build `::new_from_db` and not just use initialize?
-
-#### `::all`
-
-Implement and test a `Student.all` method that returns all instance.
-
-#### `#delete`
-
-Implement and test deleting a student.
-
-#### `#==`
-
-Teach and test that students coming out of the database are equal to each other even though the objects are different.
-
-#### Prevent ID manipulation
-
-Students should not be allowed to change their ids.
-
-#### More Finders
-
-Build a `find_by` method for every attribute, `find_by_id`, `find_by_github`, etc. Deal with multiple matches
+  * **More Finders**
+    - Build a `find_by` method for every attribute, `find_by_id`, `find_by_github`, etc. Deal with multiple matches
 
 ## Resources
 * [Wikipedia](http://en.wikipedia.org/) - [Object-Relational Mapping](http://en.wikipedia.org/wiki/Object-relational_mapping)
