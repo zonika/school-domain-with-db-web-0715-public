@@ -6,7 +6,8 @@
 
 # Basic Student ORM
 
-This lab involves building a basic ORM for a Student object.  The `Student` class defined in this lab includes behaviors of a basic ORM.
+This lab involves building a basic ORM for a Student object.  The `Student` class defined in `lib/student.rb` implements behaviors of a basic ORM.  
+
 
 ## Objectives
 * Understand what an Object Relational Mapper(ORM) is
@@ -14,21 +15,24 @@ This lab involves building a basic ORM for a Student object.  The `Student` clas
 
 
 ## Instructions
-We are going to being this lab by very briefly discussing what an ORM is and how the the `environment.rb` file in the config directory established a connection to out applicaiton's database.
+We are going to begin this lab by very briefly discussing what an ORM is and how the `environment.rb` file in our project's config directory establishes a connection to our applicaiton's database.
 
 - **what is an ORM?**
-  An ORM is an Object Relational Mapper. An ORM is basically a class that acts  as an analogy for how instances of Objects in an object-oriented program  correspond to rows in a database; that is it wraps the functionality of the   database into our class.
+  An ORM is an Object Relational Mapper. It is basically a class that acts  as an analogy for how instances of Objects in an object-oriented program  correspond to rows in a database; meaning that it wraps the functionality of the   database into our class.
 
-- **Environment**
-  Our environment is going to be a single point of requires and loads.
-   - `DB[:conn]`
-   Additionally, our environment is going to define a constant, `DB`, that  will be equal to a hash, with a single key, `:conn`, that represents our  database  connection. This key will have a value of a connection to a   sqlite3 database in the db directory. However, in our spec_helper, our  testing environment, we're going to redefine the value of that key (not of  the constant though) to point to an in-memory database. This will allow our   tests to run in   isolation of our production database. Whenever we want to   refer to the  applications connection to the database, we will simply rely on   `DB[:conn]`.
+- **Environment**  
+  Our environment is going to be a single point of requires and loads.  It is also going to define a constant, `DB`, whose sole responsibility is setting up and maintainig connection to our application's database.
+   - `DB = {:conn => SQLite3::Database.new("db/students.db")}`  
+   `DB` is set equal to a hash, which has a single key, `:conn`. The key, `:conn`,  will have a value of a connection to a sqlite3 database in the db directory.  
+   
+   		However, in our spec_helper, our  testing environment, we're going to redefine the value of that key (not of  the constant though) to point to an in-memory database. This will allow our   tests to run in   isolation of our production database. Whenever we want to   refer to the  applications connection to the database, we will simply rely on   `DB[:conn]`.
 
 ## Solving The Lab: The Spec Suite
--  **RSpec Test 1: `#attributes`**
-  The first test is just about making sure that our students have all the required attributes and that they are readable and writeable.
+-  **RSpec Test 1: `#attributes`**  
 
--  **RSpec Test 2: `::create_table`**
+  The first test is concerned soley with making sure that our students have all the required attributes and that they are readable and writeable.
+
+-  **RSpec Test 2: `::create_table`**  
   Your task  here is to define a class method on Student that will execute  the correct SQL to create a students table.
 
     ```ruby
@@ -43,13 +47,13 @@ We are going to being this lab by very briefly discussing what an ORM is and how
     end
     ```
 
-  In our test, we first make sure that our database is blank by executing the SQL command `DROP TABLE IF EXISTS students`, which helps make sure that we are starting with a clean database.
-
-  Next we call the soon to be defined `create_table` method.  This method will create a table called students with the appropriate columns.
+  Our test first make sure that we are starting with a clean database by executing the SQL command `DROP TABLE IF EXISTS students`.  
+  
+  Next we call the soon to be defined `create_table` method, which is responsible for creatng a table called students with the appropriate columns.
 
   ![sqlite_master](http://dl.dropboxusercontent.com/s/j98mxmd5d4uec9g/2014-02-18%20at%2011.21%20AM.png)
 
--  **RSpec Test 3: `::drop_table`**
+-  **RSpec Test 3: `::drop_table`**  
 This method will drop the students table from the database.
 
   ```ruby
@@ -63,8 +67,10 @@ This method will drop the students table from the database.
   end
 ```
 
-  It basically is the exact opposite of the previous test. Your job is to   define a class method on `Student` that will execute the correct SQL to drop  a students table.
--  **RSpec Test 4: `#insert`**
+  It is basically the exact opposite of the previous test. Your job is to   define a class method on `Student` that will execute the correct SQL to drop  a students table.  
+  
+-  **RSpec Test 4: `#insert`**  
+
   This method will do the heavy lifting of inserting a student instance into    the database.
 
   The test simply instantiates a student and then calls insert. The   expectation is that if we then run a simple SELECT looking for that student   by name (I know, not the best thing to measure, but it'll do), we should  find a row with that very data.
