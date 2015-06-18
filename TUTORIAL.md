@@ -391,9 +391,11 @@ Failures:
 
 ```
 
-Can you tell error if this error pertains to a class method or an instance method error?  Can you write down in plain english what this method is trying to accomplish?  See if you can answer both of these question before reading the next paragraph.
+Can you tell if this error pertains to a class method or an instance method error?  
+Can you write down in plain english what this method is trying to accomplish?  
+See if you can answer both of these question before reading the next paragraph.
 
-PAUSE
+**PAUSE**  
 HAVE YOU TRIED THINKING THROUGH THE QUESTIONS ABOVE?
 
 Okay then, lets move on.
@@ -466,7 +468,7 @@ Failures:
 
 See if you can answer both of these question before reading the next paragraph.
 
-PAUSE
+**PAUSE**
 HAVE YOU TRIED THINKING THROUGH THE QUESTIONS ABOVE?
 
 Okay then, lets move on.
@@ -504,7 +506,7 @@ Looking at the above error, it appears that the `update` method takes an existin
 
 See if you can answer the question before taking a look at the solution eading the next paragraph.
 
-PAUSE
+**PAUSE**
 HAVE YOU TRIED THINKING THROUGH THE QUESTIONS ABOVE?
 
 ```ruby
