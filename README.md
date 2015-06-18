@@ -7,7 +7,7 @@
 ## Instructions
 This lab involves building a basic ORM for a Student object.  The `Student` class defined in `lib/student.rb` implements behaviors of a basic ORM.
 
-We are going to begin by very briefly discussing what an ORM is and how the `environment.rb` file in our project's config directory establishes a connection to our application's database.
+We begin by briefly discussing what an ORM is and how the `environment.rb` file in our project's config directory establishes a connection to our application's database.
 
 - **what is an ORM?**
   An ORM is an Object Relational Mapper. It is basically a class that acts  as an analogy for how instances of Objects in an object-oriented program  correspond to rows in a database; meaning that it wraps the functionality of the   database into our class.
