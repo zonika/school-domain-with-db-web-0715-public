@@ -49,22 +49,22 @@ class Student
 
   def self.find_by_name(name)
     sql = <<-SQL
-    SELECT * FROM students WHERE name = "#{name}";
+    SELECT * FROM students WHERE name = ?;
     SQL
-    row = DB[:conn].execute(sql)
+    row = DB[:conn].execute(sql,name)
     return nil if row[0] == nil
     stu = new_from_db(row[0])
   end
 
   def update
     sql = <<-SQL
-    UPDATE students SET name = '#{@name}'
-    WHERE id = #{@id};
+    UPDATE students SET name = ?
+    WHERE id = ?;
     SQL
-    DB[:conn].execute(sql)
+    DB[:conn].execute(sql,@name,@id)
   end
 
   def save
-    
+    @id == nil ? insert : update
   end
 end
